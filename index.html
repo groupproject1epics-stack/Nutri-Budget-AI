@@ -377,7 +377,7 @@
       transition: 0.2s;
     }
 
-    /* REVIEW SECTION - DYNAMIC USER REVIEWS */
+    /* ===== REVIEW SECTION - USER GENERATED ===== */
     .review-section {
       margin-top: 22px;
       padding: 18px 22px;
@@ -394,10 +394,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: wrap;
     }
-    .review-section h3 span { font-size: 0.8rem; opacity: 0.5; font-weight: 400; }
+    .review-section h3 .count {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-weight: 400;
+    }
 
-    /* Review Form */
     .review-form {
       display: flex;
       flex-wrap: wrap;
@@ -438,8 +442,12 @@
       flex: 0 0 auto;
     }
     .review-form .submit-btn:hover { background: #ffdebb; transform: scale(1.02); }
+    .review-form .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-    /* Reviews List */
     .reviews-list {
       max-height: 300px;
       overflow-y: auto;
@@ -489,6 +497,7 @@
       opacity: 0.85;
       margin-top: 2px;
       line-height: 1.4;
+      word-wrap: break-word;
     }
     .no-reviews {
       text-align: center;
@@ -530,7 +539,7 @@
 <body>
 <div class="app-container">
   <div class="content">
-    <!-- header -->
+    <!-- Header -->
     <div class="logo-area">
       <div class="brand">
         <span class="material-symbols-outlined">restaurant</span>
@@ -542,7 +551,7 @@
       </div>
     </div>
 
-    <!-- location + map -->
+    <!-- Location + Map -->
     <div class="location-map-row">
       <div class="location-card">
         <div class="loc-left">
@@ -560,7 +569,7 @@
       </div>
     </div>
 
-    <!-- app selector -->
+    <!-- App Selector -->
     <div class="app-selector">
       <span class="material-symbols-outlined" style="font-size:1.2rem;">apps</span>
       <span style="opacity:0.7;">Live menus:</span>
@@ -570,7 +579,7 @@
       <button class="app-btn" data-app="nearby">📍 Nearby</button>
     </div>
 
-    <!-- filter + budget -->
+    <!-- Filter + Budget -->
     <div class="filter-bar">
       <div class="filter-group" id="dietFilter">
         <button class="filter-btn active" data-diet="all">All</button>
@@ -584,10 +593,10 @@
       </div>
     </div>
 
-    <!-- menu grid -->
+    <!-- Menu Grid -->
     <div class="meal-grid" id="mealGrid"></div>
 
-    <!-- info panel -->
+    <!-- Info Panel -->
     <div class="info-panel">
       <div class="calorie-box">
         <span class="material-symbols-outlined">bolt</span>
@@ -603,17 +612,17 @@
       </div>
     </div>
 
-    <!-- REVIEW SECTION - USER GENERATED -->
+    <!-- ===== REVIEW SECTION - USER GENERATED (EMPTY BY DEFAULT) ===== -->
     <div class="review-section">
       <h3>
         <span class="material-symbols-outlined" style="font-size:1.2rem;">rate_review</span> 
         User Reviews
-        <span id="reviewCount"></span>
+        <span class="count" id="reviewCount">(0 reviews)</span>
       </h3>
       
       <!-- Review Form -->
       <div class="review-form">
-        <input type="text" id="reviewName" placeholder="Your name" maxlength="50">
+        <input type="text" id="reviewName" placeholder="Your name (optional)" maxlength="50">
         <select id="reviewRating">
           <option value="5">⭐⭐⭐⭐⭐ 5</option>
           <option value="4">⭐⭐⭐⭐ 4</option>
@@ -625,9 +634,9 @@
         <button class="submit-btn" id="submitReview">Submit Review</button>
       </div>
 
-      <!-- Reviews List -->
+      <!-- Reviews List - EMPTY BY DEFAULT -->
       <div class="reviews-list" id="reviewsList">
-        <div class="no-reviews">No reviews yet. Be the first to share your experience!</div>
+        <div class="no-reviews">No reviews yet. Be the first to share your experience! 🍽️</div>
       </div>
     </div>
 
@@ -708,7 +717,7 @@
     let currentApp = 'swiggy';
     let currentDiet = 'all';
 
-    // ====== Review System ======
+    // ====== REVIEW SYSTEM - EMPTY BY DEFAULT ======
     const reviewName = document.getElementById('reviewName');
     const reviewRating = document.getElementById('reviewRating');
     const reviewText = document.getElementById('reviewText');
@@ -716,26 +725,23 @@
     const reviewsList = document.getElementById('reviewsList');
     const reviewCount = document.getElementById('reviewCount');
 
-    // Load reviews from localStorage
+    // Load reviews from localStorage - EMPTY by default
     let reviews = [];
     try {
       const saved = localStorage.getItem('nutriBudgetReviews');
-      if (saved) reviews = JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          reviews = parsed;
+        }
+      }
     } catch(e) { reviews = []; }
 
-    // Sample initial reviews if empty
-    if (reviews.length === 0) {
-      reviews = [
-        { name: 'Amit K.', rating: 5, text: 'Amazing tool! Helped me plan my monthly meals within budget. The calorie tracking is super accurate.', date: '2026-06-28' },
-        { name: 'Priya S.', rating: 4, text: 'Great concept! Love the Swiggy and Zomato integration. Would be better if it showed live restaurant menus.', date: '2026-06-29' },
-        { name: 'Rahul M.', rating: 5, text: 'Perfect for college students! I can see exactly what I can afford and how many calories I\'m eating.', date: '2026-07-01' }
-      ];
-      localStorage.setItem('nutriBudgetReviews', JSON.stringify(reviews));
-    }
+    // If no reviews, it stays EMPTY - no default reviews!
 
     function renderReviews() {
       if (reviews.length === 0) {
-        reviewsList.innerHTML = `<div class="no-reviews">No reviews yet. Be the first to share your experience!</div>`;
+        reviewsList.innerHTML = `<div class="no-reviews">No reviews yet. Be the first to share your experience! 🍽️</div>`;
         reviewCount.textContent = '(0 reviews)';
         return;
       }
@@ -748,7 +754,7 @@
         html += `
           <div class="review-item">
             <div class="review-header">
-              <span class="review-name">${escapeHtml(r.name)}</span>
+              <span class="review-name">${escapeHtml(r.name || 'Anonymous')}</span>
               <span class="review-stars">${stars}</span>
               <span class="review-date">${r.date || 'Just now'}</span>
             </div>
@@ -794,7 +800,11 @@
       
       // Show success feedback
       submitBtn.textContent = '✅ Submitted!';
-      setTimeout(() => { submitBtn.textContent = 'Submit Review'; }, 2000);
+      submitBtn.disabled = true;
+      setTimeout(() => { 
+        submitBtn.textContent = 'Submit Review';
+        submitBtn.disabled = false;
+      }, 2000);
     }
 
     submitBtn.addEventListener('click', addReview);
