@@ -44,5 +44,3 @@ Nutri-Budget AI Meal is a smart meal planning website that helps users find food
 This project is for educational purposes as part of the EPICS program.
 
 ---
-
-*Made with ❤️ for the EPICS Project*
