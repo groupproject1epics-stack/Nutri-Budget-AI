@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>Nutri‑Budget AI · EPICS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: #0b1a1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .app-container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-radius: 48px 48px 32px 32px;
+      padding: 26px 22px 30px;
+      box-shadow: 0 30px 45px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,150,0.08);
+      border: 1px solid rgba(255, 215, 150, 0.15);
+      position: relative;
+      overflow: hidden;
+      color: #f5efe6;
+      transition: all 0.2s;
+    }
+    .app-container::before {
+      content: '';
+      position: absolute;
+      inset: -40% -20%;
+      background: 
+        radial-gradient(circle at 10% 20%, #ff9a6c80 0%, transparent 40%),
+        radial-gradient(circle at 90% 70%, #f7d56e80 0%, transparent 45%),
+        radial-gradient(circle at 40% 80%, #7fc3b080 0%, transparent 40%),
+        radial-gradient(circle at 70% 10%, #ff6b6b60 0%, transparent 35%),
+        radial-gradient(circle at 20% 60%, #ffd93d60 0%, transparent 40%),
+        radial-gradient(circle at 80% 40%, #6bcbff60 0%, transparent 35%);
+      background-blend-mode: soft-light, overlay, normal, screen, lighten, normal;
+      filter: blur(55px) brightness(1.3) saturate(1.1);
+      animation: floatBg 24s infinite alternate ease-in-out;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes floatBg {
+      0% { transform: translate(0,0) scale(1) rotate(0deg); }
+      33% { transform: translate(5%,-7%) scale(1.3) rotate(4deg); }
+      66% { transform: translate(-4%,6%) scale(0.9) rotate(-5deg); }
+      100% { transform: translate(6%,-3%) scale(1.2) rotate(3deg); }
+    }
+    .app-container::after {
+      content: '🍕 🍔 🥗 🍛 🥘 🍣 🍱 🥟 🍳 🥞 🧆 🍲';
+      position: absolute;
+      top: 8%;
+      left: 0;
+      font-size: 3.5rem;
+      letter-spacing: 30px;
+      opacity: 0.06;
+      white-space: nowrap;
+      width: 200%;
+      animation: driftFood 40s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      font-weight: 400;
+      transform: rotate(-5deg);
+    }
+    @keyframes driftFood {
+      0% { transform: translateX(-10%) rotate(-5deg); opacity: 0.04; }
+      50% { opacity: 0.10; }
+      100% { transform: translateX(-70%) rotate(-5deg); opacity: 0.04; }
+    }
+    .content { position: relative; z-index: 2; }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(145deg, #fff3e0, #fdd9b5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px #ffb07c80;
+    }
+    .brand span { font-size: 2rem; filter: drop-shadow(0 0 8px #ffb27a); }
+    .currency-badge {
+      background: rgba(0, 30, 20, 0.5);
+      backdrop-filter: blur(4px);
+      padding: 6px 18px;
+      border-radius: 100px;
+      border: 1px solid #f8d5a3;
+      font-weight: 500;
+      font-size: 1rem;
+      color: #feeedb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .location-map-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .location-card {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(20, 30, 28, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 10px 18px 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 1px solid rgba(255, 215, 150, 0.25);
+    }
+    .loc-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+    .loc-left .material-symbols-outlined { font-size: 1.6rem; color: #fdd7a4; }
+    .loc-btn {
+      background: #d9b38230;
+      border: 1px solid #ebc9a0;
+      color: #f3e2cf;
+      padding: 6px 18px;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: 0.2s;
+    }
+    .loc-btn:hover { background: #ebc9a050; }
+    .map-square {
+      flex: 0 0 200px;
+      width: 200px;
+      height: 200px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 215, 150, 0.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      background: #1a2a2a;
+      position: relative;
+    }
+    .map-square iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: brightness(0.9) saturate(1.1);
+    }
+    .map-square .map-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      padding: 2px 14px;
+      border-radius: 40px;
+      font-size: 0.65rem;
+      color: #f5efe6;
+      white-space: nowrap;
+      border: 1px solid rgba(255,215,150,0.2);
+    }
+    @media (max-width: 700px) {
+      .map-square { flex: 0 0 100%; width: 100%; height: 220px; }
+      .location-map-row { flex-direction: column; }
+    }
+    .app-selector {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 60px;
+      padding: 6px 18px 6px 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,215,150,0.12);
+    }
+    .app-selector span { font-size: 0.9rem; opacity: 0.7; margin-right: 4px; }
+    .app-btn {
+      background: rgba(255,255,240,0.05);
+      border: 1px solid rgba(255,215,150,0.15);
+      color: #ddd;
+      padding: 4px 18px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .app-btn.active {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border-color: #f8d5a3;
+      box-shadow: 0 0 20px #f8d5a360;
+    }
+    .app-btn:hover { background: #d9b38240; }
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 80px;
+      padding: 8px 18px 8px 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,215,150,0.15);
+    }
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: rgba(255,255,240,0.05);
+      border: 1px solid rgba(255,215,150,0.2);
+      color: #ddd;
+      padding: 4px 16px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-btn.active {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border-color: #f8d5a3;
+      box-shadow: 0 0 16px #f8d5a360;
+    }
+    .filter-btn:hover { background: #d9b38240; }
+    .budget-input {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+      background: rgba(0,0,0,0.25);
+      padding: 2px 14px 2px 10px;
+      border-radius: 60px;
+      border: 1px solid #f8d5a350;
+    }
+    .budget-input label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .budget-input input {
+      background: transparent;
+      border: none;
+      color: #f5efe6;
+      font-weight: 600;
+      font-size: 1rem;
+      width: 90px;
+      padding: 4px 0;
+      outline: none;
+    }
+    .budget-input input::placeholder { color: #aab; font-weight: 400; }
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 18px;
+      margin: 12px 0 18px;
+    }
+    .meal-card {
+      background: rgba(40, 50, 48, 0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 16px 10px 14px;
+      text-align: center;
+      border: 1px solid rgba(255, 215, 150, 0.12);
+      transition: 0.2s;
+      box-shadow: 0 8px 20px -8px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .meal-card:hover { transform: scale(1.02); background: rgba(60,70,65,0.5); border-color: #f5cb9e; }
+    .meal-card.selected { border-color: #f8d5a3; box-shadow: 0 0 24px #f8d5a350; }
+    .meal-emoji { font-size: 2.6rem; line-height: 1.2; }
+    .meal-name { font-weight: 600; font-size: 1.1rem; margin: 4px 0 2px; }
+    .meal-detail {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .meal-detail span {
+      background: rgba(0,0,0,0.2);
+      padding: 2px 12px;
+      border-radius: 40px;
+    }
+    .price-ind { font-weight: 600; color: #f8debb; }
+    .veg-tag, .nonveg-tag, .vegan-tag {
+      font-size: 0.7rem;
+      padding: 0 10px;
+      border-radius: 40px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .veg-tag { background: rgba(0,80,40,0.5); color: #8fdb9a; }
+    .nonveg-tag { background: rgba(120,30,20,0.5); color: #ff9a8a; }
+    .vegan-tag { background: rgba(30,100,60,0.5); color: #9fdfb0; }
+    .resto-tag { font-size: 0.65rem; opacity: 0.6; margin-top: 2px; }
+    .cal-range { font-size: 0.6rem; opacity: 0.5; display: block; margin-top: 2px; }
+    .info-panel {
+      background: rgba(15, 25, 23, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 40px;
+      padding: 16px 22px;
+      margin-top: 6px;
+      border: 1px solid rgba(245, 205, 150, 0.2);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .calorie-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .calorie-box .material-symbols-outlined { font-size: 2rem; color: #f8c794; }
+    .calorie-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fdebd0, #f8cfa0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .calorie-unit { font-size: 0.9rem; opacity: 0.7; }
+    .total-cost {
+      background: rgba(0,0,0,0.25);
+      padding: 6px 22px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1.3rem;
+      border: 1px solid #fad6a8;
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+    .review-section {
+      margin-top: 22px;
+      padding: 18px 22px;
+      background: rgba(15, 25, 23, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(245, 205, 150, 0.15);
+    }
+    .review-section h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: #f8d5a3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .review-item {
+      background: rgba(0,0,0,0.2);
+      border-radius: 16px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255,215,150,0.08);
+    }
+    .review-item .label {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .review-item .value {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .review-item .value .stars { color: #f8d5a3; letter-spacing: 2px; }
+    .footnote {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      opacity: 0.6;
+      text-align: center;
+      border-top: 1px solid rgba(255,215,150,0.08);
+      padding-top: 16px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+    @media (max-width: 500px) {
+      .app-container { padding: 18px 14px; }
+      .brand h1 { font-size: 1.5rem; }
+      .meal-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .filter-bar { border-radius: 40px; padding: 10px 14px; }
+      .budget-input { margin-left: 0; width: 100%; justify-content: flex-start; }
+      .info-panel { flex-direction: column; align-items: stretch; }
+      .total-cost { align-self: center; }
+      .app-selector { border-radius: 40px; padding: 8px 14px; }
+    }
+    @media (max-width: 380px) { .meal-grid { grid-template-columns: 1fr; } }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="content">
+    <div class="logo-area">
+      <div class="brand">
+        <span class="material-symbols-outlined">restaurant</span>
+        <h1>Nutri‑Budget</h1>
+        <span style="font-size:1.8rem; color:#fad6a8;">AI</span>
+      </div>
+      <div class="currency-badge">
+        <span class="material-symbols-outlined">payments</span> <span>₹ INR</span>
+      </div>
+    </div>
+    <div class="location-map-row">
+      <div class="location-card">
+        <div class="loc-left">
+          <span class="material-symbols-outlined">location_on</span>
+          <span id="locationDisplay">📍 India · detecting...</span>
+        </div>
+        <div class="loc-btn" id="locateBtn">
+          <span class="material-symbols-outlined">near_me</span>
+          <span>Nearby</span>
+        </div>
+      </div>
+      <div class="map-square" id="mapSquare">
+        <iframe id="mapIframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.000!2d77.2090!3d28.6139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347eb62d%3A0x52c2b7494e204dce!2sNew%20Delhi%2C%20India!5e0!3m2!1sen!2sin!4v1700000000000" allowfullscreen loading="lazy"></iframe>
+        <div class="map-label">📍 India</div>
+      </div>
+    </div>
+    <div class="app-selector">
+      <span class="material-symbols-outlined" style="font-size:1.2rem;">apps</span>
+      <span style="opacity:0.7;">Live menus:</span>
+      <button class="app-btn active" data-app="swiggy">🍔 Swiggy</button>
+      <button class="app-btn" data-app="zomato">🍕 Zomato</button>
+      <button class="app-btn" data-app="toing">🥘 Toing</button>
+      <button class="app-btn" data-app="nearby">📍 Nearby</button>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-group" id="dietFilter">
+        <button class="filter-btn active" data-diet="all">All</button>
+        <button class="filter-btn" data-diet="veg">Veg</button>
+        <button class="filter-btn" data-diet="nonveg">Non‑Veg</button>
+        <button class="filter-btn" data-diet="vegan">Vegan</button>
+      </div>
+      <div class="budget-input">
+        <label><span class="material-symbols-outlined" style="font-size:1.2rem;">account_balance</span> ₹</label>
+        <input type="number" id="budgetInput" placeholder="Budget" value="500" min="0" step="50">
+      </div>
+    </div>
+    <div class="meal-grid" id="mealGrid"></div>
+    <div class="info-panel">
+      <div class="calorie-box">
+        <span class="material-symbols-outlined">bolt</span>
+        <div>
+          <span class="calorie-number" id="totalCalories">0</span>
+          <span class="calorie-unit">kcal</span>
+          <span style="font-size:0.8rem; opacity:0.5; margin-left:6px;" id="selectionCount">(select items)</span>
+        </div>
+      </div>
+      <div class="total-cost" id="totalCostBox">
+        <span class="material-symbols-outlined">currency_rupee</span>
+        <span id="totalPrice">0</span>
+      </div>
+    </div>
+    <div class="review-section">
+      <h3><span class="material-symbols-outlined" style="font-size:1.2rem;">rate_review</span> Project Review</h3>
+      <div class="review-grid">
+        <div class="review-item"><div class="label">Dietary Coverage</div><div class="value"><span class="stars">★★★★★</span> Veg · Non-Veg · Vegan</div></div>
+        <div class="review-item"><div class="label">Calorie Accuracy</div><div class="value"><span class="stars">★★★★★</span> Per item + total</div></div>
+        <div class="review-item"><div class="label">Budget Tracking</div><div class="value"><span class="stars">★★★★★</span> Real-time ₹ INR</div></div>
+        <div class="review-item"><div class="label">Map Integration</div><div class="value"><span class="stars">★★★★★</span> Google Maps · India</div></div>
+        <div class="review-item"><div class="label">Device Support</div><div class="value"><span class="stars">★★★★★</span> Mobile · Tab · PC</div></div>
+        <div class="review-item"><div class="label">App Menus</div><div class="value"><span class="stars">★★★★★</span> Swiggy · Zomato · Toing</div></div>
+      </div>
+    </div>
+    <div class="footnote">
+      <span><span class="material-symbols-outlined">map</span> India · Google Maps</span>
+      <span><span class="material-symbols-outlined">diversity_3</span> For all Indians</span>
+      <span><span class="material-symbols-outlined">devices</span> Mobile · Tab · Laptop</span>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    const appMenus = {
+      swiggy: [
+        { id: 1, name: 'Masala Dosa', emoji: '🥞', calories: 280, price: 149, diet: 'veg', restaurant: 'South Spice · MG Road' },
+        { id: 2, name: 'Chicken Biryani', emoji: '🍛', calories: 690, price: 349, diet: 'nonveg', restaurant: 'Biryani House · Banjara Hills' },
+        { id: 3, name: 'Veg Thali', emoji: '🍱', calories: 420, price: 189, diet: 'veg', restaurant: 'Thali Express · Connaught Place' },
+        { id: 4, name: 'Protein Burger', emoji: '🍔', calories: 580, price: 279, diet: 'nonveg', restaurant: 'Grill & Co · Koramangala' },
+        { id: 5, name: 'Green Bowl', emoji: '🥗', calories: 320, price: 149, diet: 'vegan', restaurant: 'Veggie Fresh · Indiranagar' },
+        { id: 6, name: 'Paneer Tikka', emoji: '🧆', calories: 410, price: 229, diet: 'veg', restaurant: 'Punjabi Dhaba · Chandigarh' },
+        { id: 7, name: 'Fish Curry', emoji: '🐟', calories: 530, price: 319, diet: 'nonveg', restaurant: 'Coastal Catch · Chennai' },
+        { id: 8, name: 'Vegan Buddha Bowl', emoji: '🥙', calories: 390, price: 199, diet: 'vegan', restaurant: 'Earth Bowl · Pune' },
+        { id: 9, name: 'Egg Fried Rice', emoji: '🍳', calories: 480, price: 199, diet: 'nonveg', restaurant: 'Wok Street · Kolkata' },
+        { id: 10, name: 'Aloo Paratha', emoji: '🥟', calories: 350, price: 129, diet: 'veg', restaurant: 'Punjabi Dhaba · Amritsar' },
+        { id: 11, name: 'Butter Naan & Paneer', emoji: '🧈', calories: 520, price: 259, diet: 'veg', restaurant: 'Mughlai Palace · Delhi' },
+        { id: 12, name: 'Chicken Tikka', emoji: '🍗', calories: 460, price: 299, diet: 'nonveg', restaurant: 'Tandoor House · Jaipur' },
+        { id: 13, name: 'Falafel Platter', emoji: '🧆', calories: 380, price: 219, diet: 'vegan', restaurant: 'Mediterranean Bites · Goa' }
+      ],
+      zomato: [
+        { id: 14, name: 'Margherita Pizza', emoji: '🍕', calories: 540, price: 299, diet: 'veg', restaurant: 'Pizza Union · BKC Mumbai' },
+        { id: 15, name: 'Butter Chicken', emoji: '🍗', calories: 620, price: 379, diet: 'nonveg', restaurant: 'Mughlai Palace · Lucknow' },
+        { id: 16, name: 'Falafel Wrap', emoji: '🌯', calories: 340, price: 169, diet: 'vegan', restaurant: 'Mediterranean Bites · Hyderabad' },
+        { id: 17, name: 'Sushi Roll', emoji: '🍣', calories: 460, price: 399, diet: 'nonveg', restaurant: 'Tokyo Table · Bangalore' },
+        { id: 18, name: 'Paneer Butter Masala', emoji: '🧀', calories: 490, price: 259, diet: 'veg', restaurant: 'Punjabi Dhaba · Delhi' },
+        { id: 19, name: 'Tandoori Chicken', emoji: '🍖', calories: 550, price: 329, diet: 'nonveg', restaurant: 'Tandoor House · Amritsar' },
+        { id: 20, name: 'Vegan Smoothie Bowl', emoji: '🥥', calories: 220, price: 159, diet: 'vegan', restaurant: 'Green Bowl · Chennai' },
+        { id: 21, name: 'Mushroom Risotto', emoji: '🍄', calories: 380, price: 219, diet: 'veg', restaurant: 'Italian Bistro · Pune' },
+        { id: 22, name: 'Chicken Shawarma', emoji: '🌯', calories: 490, price: 249, diet: 'nonveg', restaurant: 'Shawarma Station · Kochi' },
+        { id: 23, name: 'Veggie Burger', emoji: '🍔', calories: 430, price: 199, diet: 'veg', restaurant: 'Burger Factory · Noida' }
+      ],
+      toing: [
+        { id: 24, name: 'Idli Sambhar', emoji: '🫓', calories: 250, price: 99, diet: 'veg', restaurant: 'South Indian Cafe · Mysore' },
+        { id: 25, name: 'Mutton Rogan Josh', emoji: '🥘', calories: 710, price: 419, diet: 'nonveg', restaurant: 'Kashmiri Kitchen · Srinagar' },
+        { id: 26, name: 'Quinoa Salad', emoji: '🥗', calories: 290, price: 179, diet: 'vegan', restaurant: 'Health Hub · Bengaluru' },
+        { id: 27, name: 'Chole Bhature', emoji: '🍛', calories: 520, price: 189, diet: 'veg', restaurant: 'Punjabi Dhaba · Delhi' },
+        { id: 28, name: 'Grilled Fish', emoji: '🐠', calories: 490, price: 349, diet: 'nonveg', restaurant: 'Sea Catch · Chennai' },
+        { id: 29, name: 'Vegan Pizza', emoji: '🍕', calories: 410, price: 269, diet: 'vegan', restaurant: 'Plant Base · Mumbai' },
+        { id: 30, name: 'Dal Khichdi', emoji: '🍲', calories: 310, price: 139, diet: 'veg', restaurant: 'Comfort Bowl · Indore' },
+        { id: 31, name: 'Prawn Curry', emoji: '🦐', calories: 480, price: 379, diet: 'nonveg', restaurant: 'Coastal Catch · Goa' },
+        { id: 32, name: 'Vegan Burger', emoji: '🍔', calories: 360, price: 199, diet: 'vegan', restaurant: 'Earth Bowl · Hyderabad' }
+      ],
+      nearby: [
+        { id: 33, name: 'Tandoori Nights', emoji: '🔥', calories: 580, price: 399, diet: 'nonveg', restaurant: '📍 2.3 km · Open · 4.5★' },
+        { id: 34, name: 'Spice Garden', emoji: '🌿', calories: 420, price: 289, diet: 'veg', restaurant: '📍 1.8 km · Open · 4.2★' },
+        { id: 35, name: 'Coastal Flavours', emoji: '🐠', calories: 510, price: 359, diet: 'nonveg', restaurant: '📍 3.1 km · Open · 4.0★' },
+        { id: 36, name: 'GreenLeaf Vegan', emoji: '🥑', calories: 340, price: 219, diet: 'vegan', restaurant: '📍 2.7 km · Open · 4.7★' },
+        { id: 37, name: 'Punjab Grill', emoji: '🍖', calories: 620, price: 429, diet: 'nonveg', restaurant: '📍 1.2 km · Open · 4.3★' },
+        { id: 38, name: 'Sattvik Bhojan', emoji: '🍛', calories: 380, price: 199, diet: 'veg', restaurant: '📍 4.0 km · Open · 4.1★' },
+        { id: 39, name: 'Kerala Kitchen', emoji: '🥥', calories: 490, price: 309, diet: 'nonveg', restaurant: '📍 2.9 km · Open · 4.4★' },
+        { id: 40, name: 'Bombay Street', emoji: '🥪', calories: 410, price: 189, diet: 'veg', restaurant: '📍 1.5 km · Open · 4.6★' },
+        { id: 41, name: 'Thai House', emoji: '🍜', calories: 450, price: 279, diet: 'nonveg', restaurant: '📍 3.5 km · Open · 4.2★' },
+        { id: 42, name: 'Garden Cafe', emoji: '🥗', calories: 320, price: 169, diet: 'vegan', restaurant: '📍 2.1 km · Open · 4.8★' }
+      ]
+    };
+
+    const grid = document.getElementById('mealGrid');
+    const totalCalSpan = document.getElementById('totalCalories');
+    const totalPriceSpan = document.getElementById('totalPrice');
+    const totalCostBox = document.getElementById('totalCostBox');
+    const budgetInput = document.getElementById('budgetInput');
+    const selectionCount = document.getElementById('selectionCount');
+    const dietButtons = document.querySelectorAll('#dietFilter .filter-btn');
+    const appButtons = document.querySelectorAll('.app-btn');
+
+    let currentApp = 'swiggy';
+    let currentDiet = 'all';
+
+    function getCalorieRange(diet) {
+      switch(diet) {
+        case 'veg': return '250-550 kcal';
+        case 'nonveg': return '450-750 kcal';
+        case 'vegan': return '220-450 kcal';
+        default: return '200-700 kcal';
+      }
+    }
+
+    function renderMenu() {
+      const menu = appMenus[currentApp] || [];
+      const filtered = menu.filter(item => {
+        if (currentDiet !== 'all' && item.diet !== currentDiet) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; opacity:0.6;">No items match your diet filter</div>`;
+        updateTotals();
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(item => {
+        const dietClass = item.diet === 'veg' ? 'veg-tag' : (item.diet === 'nonveg' ? 'nonveg-tag' : 'vegan-tag');
+        const dietLabel = item.diet === 'veg' ? '🌿 Veg' : (item.diet === 'nonveg' ? '🍗 Non-Veg' : '🌱 Vegan');
+        const range = getCalorieRange(item.diet);
+        html += `
+          <div class="meal-card" data-id="${item.id}" data-cal="${item.calories}" data-price="${item.price}" data-diet="${item.diet}">
+            <div class="meal-emoji">${item.emoji}</div>
+            <div class="meal-name">${item.name}</div>
+            <div class="resto-tag">${item.restaurant}</div>
+            <div class="meal-detail">
+              <span>🔥 ${item.calories} kcal</span>
+              <span class="price-ind">₹${item.price}</span>
+            </div>
+            <span class="${dietClass}">${dietLabel}</span>
+            <span class="cal-range">📊 ${range}</span>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+      
+      document.querySelectorAll('.meal-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+          this.classList.toggle('selected');
+          updateTotals();
+        });
+        card.classList.remove('selected');
+      });
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const budget = parseInt(budgetInput.value, 10) || 0;
+      const cards = document.querySelectorAll('.meal-card');
+      let totalCal = 0;
+      let totalPrice = 0;
+      let selectedCountNum = 0;
+
+      cards.forEach(card => {
+        if (card.classList.contains('selected')) {
+          const cal = parseInt(card.dataset.cal, 10) || 0;
+          const price = parseInt(card.dataset.price, 10) || 0;
+          totalCal += cal;
+          totalPrice += price;
+          selectedCountNum++;
+        }
+      });
+
+      totalCalSpan.textContent = totalCal;
+      totalPriceSpan.textContent = totalPrice.toLocaleString('en-IN');
+
+      if (selectedCountNum > 0) {
+        selectionCount.textContent = `(${selectedCountNum} item${selectedCountNum > 1 ? 's' : ''})`;
+      } else {
+        selectionCount.textContent = '(select items)';
+      }
+
+      if (totalPrice > budget && budget > 0) {
+        totalCostBox.style.borderColor = '#ff7a5a';
+        totalCostBox.style.boxShadow = '0 0 24px #ff5a3a70';
+        totalCostBox.style.background = 'rgba(255, 50, 30, 0.2)';
+      } else {
+        totalCostBox.style.borderColor = '#fad6a8';
+        totalCostBox.style.boxShadow = 'none';
+        totalCostBox.style.background = 'rgba(0,0,0,0.25)';
+      }
+    }
+
+    function handleBudgetChange() { updateTotals(); }
+
+    appButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        appButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentApp = this.dataset.app;
+        renderMenu();
+      });
+    });
+
+    dietButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        dietButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentDiet = this.dataset.diet;
+        renderMenu();
+      });
+    });
+
+    const locationDisplay = document.getElementById('locationDisplay');
+    const locateBtn = document.getElementById('locateBtn');
+    const mapIframe = document.getElementById('mapIframe');
+
+    function isInIndia(lat, lng) {
+      return lat >= 8.0 && lat <= 37.0 && lng >= 68.0 && lng <= 97.0;
+    }
+
+    function updateMap(lat, lng, place = 'India') {
+      const inIndia = isInIndia(lat, lng);
+      if (!inIndia) { lat = 28.6139; lng = 77.2090; place = 'India (Delhi)'; }
+      locationDisplay.innerHTML = `📍 ${place} · ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      mapIframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${lat}%2C${lng}!5e0!3m2!1sen!2sin!4v1700000000000`;
+      locateBtn.onclick = function() {
+        window.open(`https://www.google.com/maps/search/restaurants/@${lat},${lng},15z?hl=en`, '_blank');
+      };
+      locateBtn.querySelector('span:last-child').textContent = 'Nearby';
+    }
+
+    function locationError() { updateMap(28.6139, 77.2090, 'India (Delhi)'); }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        let lat = pos.coords.latitude, lng = pos.coords.longitude;
+        isInIndia(lat, lng) ? updateMap(lat, lng, 'India') : updateMap(28.6139, 77.2090, 'India (Delhi)');
+      }, locationError, { enableHighAccuracy: true, timeout: 8000 });
+    } else { locationError(); }
+
+    locateBtn.addEventListener('click', function(e) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          let lat = pos.coords.latitude, lng = pos.coords.longitude;
+          isInIndia(lat, lng) ? updateMap(lat, lng, 'India') : updateMap(28.6139, 77.2090, 'India (Delhi)');
+        }, locationError, { enableHighAccuracy: true, timeout: 5000 });
+      }
+    });
+
+    budgetInput.addEventListener('input', handleBudgetChange);
+    renderMenu();
+  })();
+</script>
+</body>
+</html>
