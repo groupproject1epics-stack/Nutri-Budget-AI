@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>NutriBudget AI · Meal Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0,1" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+    body {
+      min-height: 100vh;
+      background: #0b1a1e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .app-container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-radius: 48px 48px 32px 32px;
+      padding: 26px 22px 30px;
+      box-shadow: 0 30px 45px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,215,150,0.08);
+      border: 1px solid rgba(255, 215, 150, 0.15);
+      position: relative;
+      overflow: hidden;
+      color: #f5efe6;
+      transition: all 0.2s;
+    }
+    .app-container::before {
+      content: '';
+      position: absolute;
+      inset: -40% -20%;
+      background: 
+        radial-gradient(circle at 10% 20%, #ff9a6c80 0%, transparent 40%),
+        radial-gradient(circle at 90% 70%, #f7d56e80 0%, transparent 45%),
+        radial-gradient(circle at 40% 80%, #7fc3b080 0%, transparent 40%),
+        radial-gradient(circle at 70% 10%, #ff6b6b60 0%, transparent 35%),
+        radial-gradient(circle at 20% 60%, #ffd93d60 0%, transparent 40%),
+        radial-gradient(circle at 80% 40%, #6bcbff60 0%, transparent 35%);
+      background-blend-mode: soft-light, overlay, normal, screen, lighten, normal;
+      filter: blur(55px) brightness(1.3) saturate(1.1);
+      animation: floatBg 24s infinite alternate ease-in-out;
+      z-index: 0;
+      pointer-events: none;
+    }
+    @keyframes floatBg {
+      0% { transform: translate(0,0) scale(1) rotate(0deg); }
+      33% { transform: translate(5%,-7%) scale(1.3) rotate(4deg); }
+      66% { transform: translate(-4%,6%) scale(0.9) rotate(-5deg); }
+      100% { transform: translate(6%,-3%) scale(1.2) rotate(3deg); }
+    }
+    .app-container::after {
+      content: '🍕 🍔 🥗 🍛 🥘 🍣 🍱 🥟 🍳 🥞 🧆 🍲';
+      position: absolute;
+      top: 8%;
+      left: 0;
+      font-size: 3.5rem;
+      letter-spacing: 30px;
+      opacity: 0.06;
+      white-space: nowrap;
+      width: 200%;
+      animation: driftFood 40s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+      font-weight: 400;
+      transform: rotate(-5deg);
+    }
+    @keyframes driftFood {
+      0% { transform: translateX(-10%) rotate(-5deg); opacity: 0.04; }
+      50% { opacity: 0.10; }
+      100% { transform: translateX(-70%) rotate(-5deg); opacity: 0.04; }
+    }
+    .content { position: relative; z-index: 2; }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      background: linear-gradient(145deg, #fff3e0, #fdd9b5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px #ffb07c80;
+    }
+    .brand span { font-size: 2rem; filter: drop-shadow(0 0 8px #ffb27a); }
+    .currency-badge {
+      background: rgba(0, 30, 20, 0.5);
+      backdrop-filter: blur(4px);
+      padding: 6px 18px;
+      border-radius: 100px;
+      border: 1px solid #f8d5a3;
+      font-weight: 500;
+      font-size: 1rem;
+      color: #feeedb;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .problem-banner {
+      background: rgba(255, 70, 50, 0.12);
+      border: 1px solid rgba(255, 100, 80, 0.25);
+      border-radius: 20px;
+      padding: 12px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .problem-banner .icon { font-size: 1.8rem; }
+    .problem-banner .text {
+      font-size: 0.85rem;
+      opacity: 0.85;
+      flex: 1;
+    }
+    .problem-banner .text strong { color: #ff9a7a; }
+
+    .location-map-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .location-card {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(20, 30, 28, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 10px 18px 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      border: 1px solid rgba(255, 215, 150, 0.25);
+    }
+    .loc-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+    .loc-left .material-symbols-outlined { font-size: 1.6rem; color: #fdd7a4; }
+    .loc-btn {
+      background: #d9b38230;
+      border: 1px solid #ebc9a0;
+      color: #f3e2cf;
+      padding: 6px 18px;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: 0.2s;
+    }
+    .loc-btn:hover { background: #ebc9a050; }
+    .map-square {
+      flex: 0 0 200px;
+      width: 200px;
+      height: 200px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 2px solid rgba(255, 215, 150, 0.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      background: #1a2a2a;
+      position: relative;
+    }
+    .map-square iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: brightness(0.9) saturate(1.1);
+    }
+    .map-square .map-label {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      padding: 2px 14px;
+      border-radius: 40px;
+      font-size: 0.65rem;
+      color: #f5efe6;
+      white-space: nowrap;
+      border: 1px solid rgba(255,215,150,0.2);
+    }
+    @media (max-width: 700px) {
+      .map-square { flex: 0 0 100%; width: 100%; height: 220px; }
+      .location-map-row { flex-direction: column; }
+    }
+
+    .ai-budget-section {
+      background: rgba(248, 213, 163, 0.08);
+      border: 1px solid rgba(248, 213, 163, 0.15);
+      border-radius: 24px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+    .ai-budget-section .label {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ai-budget-section .label .material-symbols-outlined { color: #f8d5a3; }
+    .ai-budget-section .budget-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,0,0,0.25);
+      padding: 4px 16px 4px 12px;
+      border-radius: 60px;
+      border: 1px solid rgba(248, 213, 163, 0.2);
+    }
+    .ai-budget-section .budget-input-wrap input {
+      background: transparent;
+      border: none;
+      color: #f5efe6;
+      font-weight: 600;
+      font-size: 1.1rem;
+      width: 100px;
+      padding: 6px 0;
+      outline: none;
+    }
+    .ai-budget-section .ai-btn {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border: none;
+      padding: 8px 28px;
+      border-radius: 60px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .ai-budget-section .ai-btn:hover { background: #ffdebb; transform: scale(1.02); }
+    .ai-budget-section .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .app-selector {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 60px;
+      padding: 6px 18px 6px 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,215,150,0.12);
+    }
+    .app-selector span { font-size: 0.9rem; opacity: 0.7; margin-right: 4px; }
+    .app-btn {
+      background: rgba(255,255,240,0.05);
+      border: 1px solid rgba(255,215,150,0.15);
+      color: #ddd;
+      padding: 4px 18px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .app-btn.active {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border-color: #f8d5a3;
+      box-shadow: 0 0 20px #f8d5a360;
+    }
+    .app-btn:hover { background: #d9b38240; }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px 16px;
+      background: rgba(0,0,0,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 80px;
+      padding: 8px 18px 8px 22px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,215,150,0.15);
+    }
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: rgba(255,255,240,0.05);
+      border: 1px solid rgba(255,215,150,0.2);
+      color: #ddd;
+      padding: 4px 16px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .filter-btn.active {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border-color: #f8d5a3;
+      box-shadow: 0 0 16px #f8d5a360;
+    }
+    .filter-btn:hover { background: #d9b38240; }
+
+    /* ===== MEAL GRID ===== */
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+      margin: 12px 0 18px;
+    }
+    .meal-card {
+      background: rgba(40, 50, 48, 0.4);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 16px 12px 14px;
+      text-align: center;
+      border: 1px solid rgba(255, 215, 150, 0.12);
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px -8px rgba(0,0,0,0.4);
+      position: relative;
+    }
+    .meal-card:hover { transform: translateY(-4px); background: rgba(60,70,65,0.5); border-color: #f5cb9e; }
+    .meal-card .meal-emoji { font-size: 2.6rem; line-height: 1.2; }
+    .meal-card .meal-name { font-weight: 600; font-size: 1.1rem; margin: 4px 0 2px; }
+    .meal-card .meal-detail {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+    .meal-card .meal-detail span {
+      background: rgba(0,0,0,0.2);
+      padding: 2px 12px;
+      border-radius: 40px;
+    }
+    .meal-card .price-ind { font-weight: 600; color: #f8debb; }
+    .meal-card .veg-tag, .meal-card .nonveg-tag, .meal-card .vegan-tag {
+      font-size: 0.65rem;
+      padding: 0 10px;
+      border-radius: 40px;
+      display: inline-block;
+      margin-top: 4px;
+    }
+    .meal-card .veg-tag { background: rgba(0,80,40,0.5); color: #8fdb9a; }
+    .meal-card .nonveg-tag { background: rgba(120,30,20,0.5); color: #ff9a8a; }
+    .meal-card .vegan-tag { background: rgba(30,100,60,0.5); color: #9fdfb0; }
+    .meal-card .resto-tag { 
+      font-size: 0.6rem; 
+      opacity: 0.6; 
+      margin-top: 2px;
+      background: rgba(248, 213, 163, 0.1);
+      padding: 2px 10px;
+      border-radius: 40px;
+      display: inline-block;
+      border: 1px solid rgba(248, 213, 163, 0.1);
+    }
+
+    /* ===== QUANTITY CONTROLS (Blinkit Style) ===== */
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-top: 10px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 40px;
+      padding: 2px;
+      border: 1px solid rgba(255,215,150,0.15);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .quantity-controls .qty-btn {
+      background: transparent;
+      border: none;
+      color: #f5efe6;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quantity-controls .qty-btn:hover {
+      background: rgba(248, 213, 163, 0.2);
+    }
+    .quantity-controls .qty-btn:active {
+      transform: scale(0.9);
+    }
+    .quantity-controls .qty-btn.minus {
+      color: #ff7a5a;
+    }
+    .quantity-controls .qty-btn.plus {
+      color: #8fdb9a;
+    }
+    .quantity-controls .qty-display {
+      min-width: 28px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #f8d5a3;
+      padding: 0 4px;
+    }
+    .quantity-controls .add-btn {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border: none;
+      padding: 4px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      height: 30px;
+    }
+    .quantity-controls .add-btn:hover {
+      background: #ffdebb;
+      transform: scale(1.05);
+    }
+    .quantity-controls .add-btn:active {
+      transform: scale(0.95);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .quantity-controls.pop {
+      animation: popIn 0.3s ease;
+    }
+
+    /* ===== CART SUMMARY ===== */
+    .info-panel {
+      background: rgba(15, 25, 23, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 40px;
+      padding: 16px 22px;
+      margin-top: 6px;
+      border: 1px solid rgba(245, 205, 150, 0.2);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .calorie-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .calorie-box .material-symbols-outlined { font-size: 2rem; color: #f8c794; }
+    .calorie-box .calorie-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fdebd0, #f8cfa0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .calorie-box .calorie-unit { font-size: 0.9rem; opacity: 0.7; }
+    .calorie-box .item-count {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      margin-left: 6px;
+    }
+    .total-cost {
+      background: rgba(0,0,0,0.25);
+      padding: 6px 22px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1.3rem;
+      border: 1px solid #fad6a8;
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+
+    .shopping-list-section {
+      margin-top: 18px;
+      padding: 16px 20px;
+      background: rgba(15, 25, 23, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(245, 205, 150, 0.15);
+    }
+    .shopping-list-section h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      color: #f8d5a3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .shopping-list-section h3 .count {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-weight: 400;
+    }
+    .shopping-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 30px;
+    }
+    .shopping-list .list-item {
+      background: rgba(248, 213, 163, 0.1);
+      border: 1px solid rgba(248, 213, 163, 0.15);
+      border-radius: 40px;
+      padding: 4px 14px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: popIn 0.3s ease;
+    }
+    .shopping-list .list-item .qty-badge {
+      background: rgba(248, 213, 163, 0.2);
+      border-radius: 40px;
+      padding: 0 8px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #f8d5a3;
+    }
+    .shopping-list .list-item .remove {
+      cursor: pointer;
+      opacity: 0.4;
+      font-size: 0.9rem;
+    }
+    .shopping-list .list-item .remove:hover { opacity: 1; color: #ff7a5a; }
+    .shopping-list .empty-list {
+      opacity: 0.4;
+      font-size: 0.85rem;
+      padding: 6px 0;
+    }
+
+    /* ===== NEARBY RESTAURANTS SECTION ===== */
+    .nearby-section {
+      margin-top: 18px;
+      padding: 16px 20px;
+      background: rgba(15, 25, 23, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(245, 205, 150, 0.15);
+    }
+    .nearby-section h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #f8d5a3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nearby-section h3 .count {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-weight: 400;
+    }
+    .nearby-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .restaurant-card {
+      background: rgba(0,0,0,0.25);
+      border-radius: 20px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,215,150,0.08);
+      transition: all 0.3s ease;
+    }
+    .restaurant-card:hover {
+      border-color: rgba(248, 213, 163, 0.2);
+      transform: translateY(-2px);
+    }
+    .restaurant-card .resto-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .restaurant-card .resto-name {
+      font-weight: 600;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .restaurant-card .resto-name .resto-icon {
+      font-size: 1.4rem;
+    }
+    .restaurant-card .resto-distance {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      background: rgba(0,0,0,0.2);
+      padding: 2px 12px;
+      border-radius: 40px;
+    }
+    .restaurant-card .resto-rating {
+      font-size: 0.8rem;
+      color: #f8d5a3;
+    }
+    .restaurant-card .resto-menu {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .restaurant-card .menu-item-tag {
+      font-size: 0.7rem;
+      background: rgba(248, 213, 163, 0.08);
+      border: 1px solid rgba(248, 213, 163, 0.1);
+      border-radius: 40px;
+      padding: 2px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .restaurant-card .menu-item-tag:hover {
+      background: rgba(248, 213, 163, 0.15);
+      border-color: rgba(248, 213, 163, 0.2);
+    }
+    .restaurant-card .menu-item-tag .menu-price {
+      opacity: 0.6;
+      font-size: 0.65rem;
+    }
+    .restaurant-card .resto-address {
+      font-size: 0.65rem;
+      opacity: 0.3;
+      margin-top: 6px;
+    }
+    .no-nearby {
+      text-align: center;
+      opacity: 0.4;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    .review-section {
+      margin-top: 18px;
+      padding: 18px 22px;
+      background: rgba(15, 25, 23, 0.5);
+      backdrop-filter: blur(8px);
+      border-radius: 32px;
+      border: 1px solid rgba(245, 205, 150, 0.15);
+    }
+    .review-section h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: #f8d5a3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .review-section h3 .count {
+      font-size: 0.8rem;
+      opacity: 0.5;
+      font-weight: 400;
+    }
+    .review-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      background: rgba(0,0,0,0.2);
+      padding: 14px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,215,150,0.08);
+    }
+    .review-form input, .review-form textarea, .review-form select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,215,150,0.15);
+      color: #f5efe6;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: 0.2s;
+    }
+    .review-form input:focus, .review-form textarea:focus, .review-form select:focus {
+      border-color: #f8d5a3;
+      box-shadow: 0 0 16px #f8d5a320;
+    }
+    .review-form input { flex: 1 1 140px; }
+    .review-form select { flex: 0 0 120px; cursor: pointer; }
+    .review-form textarea { flex: 1 1 100%; min-height: 50px; resize: vertical; }
+    .review-form .submit-btn {
+      background: #f8d5a3;
+      color: #1a2a24;
+      border: none;
+      padding: 8px 28px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 0.9rem;
+      flex: 0 0 auto;
+    }
+    .review-form .submit-btn:hover { background: #ffdebb; transform: scale(1.02); }
+    .review-form .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .reviews-list {
+      max-height: 250px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+    .reviews-list::-webkit-scrollbar { width: 4px; }
+    .reviews-list::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 4px; }
+    .reviews-list::-webkit-scrollbar-thumb { background: #f8d5a360; border-radius: 4px; }
+
+    .review-item {
+      background: rgba(0,0,0,0.2);
+      border-radius: 16px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255,215,150,0.06);
+      animation: popIn 0.3s ease;
+    }
+    .review-item .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .review-item .review-name { font-weight: 600; font-size: 0.95rem; }
+    .review-item .review-stars { color: #f8d5a3; letter-spacing: 1px; font-size: 0.9rem; }
+    .review-item .review-date { font-size: 0.65rem; opacity: 0.4; }
+    .review-item .review-text { font-size: 0.9rem; opacity: 0.85; margin-top: 2px; line-height: 1.4; word-wrap: break-word; }
+    .no-reviews {
+      text-align: center;
+      opacity: 0.4;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    .footnote {
+      margin-top: 18px;
+      font-size: 0.75rem;
+      opacity: 0.6;
+      text-align: center;
+      border-top: 1px solid rgba(255,215,150,0.08);
+      padding-top: 16px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+    }
+    @media (max-width: 500px) {
+      .app-container { padding: 18px 14px; }
+      .brand h1 { font-size: 1.5rem; }
+      .meal-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+      .nearby-grid { grid-template-columns: 1fr; }
+      .filter-bar { border-radius: 40px; padding: 10px 14px; }
+      .info-panel { flex-direction: column; align-items: stretch; }
+      .total-cost { align-self: center; }
+      .app-selector { border-radius: 40px; padding: 8px 14px; }
+      .ai-budget-section { flex-direction: column; align-items: stretch; }
+      .ai-budget-section .ai-btn { margin-left: 0; justify-content: center; }
+      .review-form input { flex: 1 1 100%; }
+      .review-form select { flex: 1 1 100%; }
+    }
+    @media (max-width: 380px) { .meal-grid { grid-template-columns: 1fr; } }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body>
+<div class="app-container">
+  <div class="content">
+    <!-- Header -->
+    <div class="logo-area">
+      <div class="brand">
+        <span class="material-symbols-outlined">restaurant</span>
+        <h1>NutriBudget</h1>
+        <span style="font-size:1.8rem; color:#fad6a8;">AI</span>
+      </div>
+      <div class="currency-badge">
+        <span class="material-symbols-outlined">payments</span> <span>₹ INR</span>
+      </div>
+    </div>
+
+    <!-- Problem Banner -->
+    <div class="problem-banner">
+      <span class="icon">🎓</span>
+      <span class="text">
+        <strong>Problem:</strong> Students have limited budgets and poor diets. 
+        <strong>Solution:</strong> Enter budget → AI suggests healthy meals → Add to cart with quantity
+      </span>
+    </div>
+
+    <!-- Location + Map -->
+    <div class="location-map-row">
+      <div class="location-card">
+        <div class="loc-left">
+          <span class="material-symbols-outlined">location_on</span>
+          <span id="locationDisplay">📍 India · detecting...</span>
+        </div>
+        <div class="loc-btn" id="locateBtn">
+          <span class="material-symbols-outlined">near_me</span>
+          <span>Nearby</span>
+        </div>
+      </div>
+      <div class="map-square" id="mapSquare">
+        <iframe id="mapIframe" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.000!2d77.2090!3d28.6139!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5b347eb62d%3A0x52c2b7494e204dce!2sNew%20Delhi%2C%20India!5e0!3m2!1sen!2sin!4v1700000000000" allowfullscreen loading="lazy"></iframe>
+        <div class="map-label">📍 India</div>
+      </div>
+    </div>
+
+    <!-- AI Budget -->
+    <div class="ai-budget-section">
+      <div class="label">
+        <span class="material-symbols-outlined">smart_toy</span>
+        AI Meal Planner
+      </div>
+      <div class="budget-input-wrap">
+        <span>₹</span>
+        <input type="number" id="aiBudgetInput" placeholder="Budget" value="300" min="0" step="10">
+        <span style="font-size:0.7rem; opacity:0.5;">/day</span>
+      </div>
+      <button class="ai-btn" id="aiSuggestBtn">
+        <span class="material-symbols-outlined" style="font-size:1.2rem;">auto_awesome</span>
+        Suggest Meals
+      </button>
+    </div>
+
+    <!-- App Selector -->
+    <div class="app-selector">
+      <span class="material-symbols-outlined" style="font-size:1.2rem;">apps</span>
+      <span style="opacity:0.7;">Live menus:</span>
+      <button class="app-btn active" data-app="swiggy">🍔 Swiggy</button>
+      <button class="app-btn" data-app="zomato">🍕 Zomato</button>
+      <button class="app-btn" data-app="toing">🥘 Toing</button>
+      <button class="app-btn" data-app="nearby">📍 Nearby</button>
+    </div>
+
+    <!-- Diet Filter -->
+    <div class="filter-bar">
+      <div class="filter-group" id="dietFilter">
+        <button class="filter-btn active" data-diet="all">All</button>
+        <button class="filter-btn" data-diet="veg">🌿 Veg</button>
+        <button class="filter-btn" data-diet="nonveg">🍗 Non‑Veg</button>
+        <button class="filter-btn" data-diet="vegan">🌱 Vegan</button>
+      </div>
+      <div style="font-size:0.7rem; opacity:0.3; margin-left:auto;">
+        + / − to add quantity
+      </div>
+    </div>
+
+    <!-- Meal Grid -->
+    <div class="meal-grid" id="mealGrid"></div>
+
+    <!-- Cart Summary -->
+    <div class="info-panel">
+      <div class="calorie-box">
+        <span class="material-symbols-outlined">bolt</span>
+        <div>
+          <span class="calorie-number" id="totalCalories">0</span>
+          <span class="calorie-unit">kcal</span>
+          <span class="item-count" id="cartItemCount">(0 items)</span>
+        </div>
+      </div>
+      <div class="total-cost" id="totalCostBox">
+        <span class="material-symbols-outlined">currency_rupee</span>
+        <span id="totalPrice">0</span>
+      </div>
+    </div>
+
+    <!-- Shopping List / Cart -->
+    <div class="shopping-list-section">
+      <h3>
+        <span class="material-symbols-outlined" style="font-size:1.2rem;">shopping_cart</span>
+        Your Cart
+        <span class="count" id="listCount">(0 items)</span>
+      </h3>
+      <div class="shopping-list" id="shoppingList">
+        <div class="empty-list">Your cart is empty. Add items using + button above.</div>
+      </div>
+    </div>
+
+    <!-- ===== NEARBY RESTAURANTS SECTION ===== -->
+    <div class="nearby-section" id="nearbySection">
+      <h3>
+        <span class="material-symbols-outlined" style="font-size:1.2rem;">storefront</span>
+        Nearby Restaurants
+        <span class="count" id="nearbyCount">(0 nearby)</span>
+      </h3>
+      <div class="nearby-grid" id="nearbyGrid">
+        <div class="no-nearby">📍 Detecting restaurants near you...</div>
+      </div>
+    </div>
+
+    <!-- Reviews -->
+    <div class="review-section">
+      <h3>
+        <span class="material-symbols-outlined" style="font-size:1.2rem;">rate_review</span> 
+        User Reviews
+        <span class="count" id="reviewCount">(0 reviews)</span>
+      </h3>
+      <div class="review-form">
+        <input type="text" id="reviewName" placeholder="Your name (optional)" maxlength="50">
+        <select id="reviewRating">
+          <option value="5">⭐⭐⭐⭐⭐ 5</option>
+          <option value="4">⭐⭐⭐⭐ 4</option>
+          <option value="3">⭐⭐⭐ 3</option>
+          <option value="2">⭐⭐ 2</option>
+          <option value="1">⭐ 1</option>
+        </select>
+        <textarea id="reviewText" placeholder="Share your experience..." maxlength="500"></textarea>
+        <button class="submit-btn" id="submitReview">Submit Review</button>
+      </div>
+      <div class="reviews-list" id="reviewsList">
+        <div class="no-reviews">No reviews yet. Be the first! 🍽️</div>
+      </div>
+    </div>
+
+    <div class="footnote">
+      <span><span class="material-symbols-outlined">map</span> India · Google Maps</span>
+      <span><span class="material-symbols-outlined">diversity_3</span> For all Indians</span>
+      <span><span class="material-symbols-outlined">devices</span> Mobile · Tab · Laptop</span>
+      <span><span class="material-symbols-outlined">lightbulb</span> Budget ₹100/day = healthy meals</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ====== MENUS WITH RESTAURANT NAMES ======
+    const appMenus = {
+      swiggy: [
+        { id: 1, name: 'Masala Dosa', emoji: '🥞', calories: 280, price: 149, diet: 'veg', restaurant: 'South Spice · MG Road', restoLat: 28.6139, restoLng: 77.2090 },
+        { id: 2, name: 'Chicken Biryani', emoji: '🍛', calories: 690, price: 349, diet: 'nonveg', restaurant: 'Biryani House · Banjara Hills', restoLat: 28.6239, restoLng: 77.2190 },
+        { id: 3, name: 'Veg Thali', emoji: '🍱', calories: 420, price: 189, diet: 'veg', restaurant: 'Thali Express · Connaught Place', restoLat: 28.6339, restoLng: 77.2290 },
+        { id: 4, name: 'Protein Burger', emoji: '🍔', calories: 580, price: 279, diet: 'nonveg', restaurant: 'Grill & Co · Koramangala', restoLat: 28.6439, restoLng: 77.2390 },
+        { id: 5, name: 'Green Bowl', emoji: '🥗', calories: 320, price: 149, diet: 'vegan', restaurant: 'Veggie Fresh · Indiranagar', restoLat: 28.6539, restoLng: 77.2490 },
+        { id: 6, name: 'Paneer Tikka', emoji: '🧆', calories: 410, price: 229, diet: 'veg', restaurant: 'Punjabi Dhaba · Chandigarh', restoLat: 28.6639, restoLng: 77.2590 },
+        { id: 7, name: 'Fish Curry', emoji: '🐟', calories: 530, price: 319, diet: 'nonveg', restaurant: 'Coastal Catch · Chennai', restoLat: 28.6739, restoLng: 77.2690 },
+        { id: 8, name: 'Vegan Bowl', emoji: '🥙', calories: 390, price: 199, diet: 'vegan', restaurant: 'Earth Bowl · Pune', restoLat: 28.6839, restoLng: 77.2790 },
+        { id: 9, name: 'Egg Fried Rice', emoji: '🍳', calories: 480, price: 199, diet: 'nonveg', restaurant: 'Wok Street · Kolkata', restoLat: 28.6939, restoLng: 77.2890 },
+        { id: 10, name: 'Aloo Paratha', emoji: '🥟', calories: 350, price: 129, diet: 'veg', restaurant: 'Punjabi Dhaba · Amritsar', restoLat: 28.7039, restoLng: 77.2990 }
+      ],
+      zomato: [
+        { id: 11, name: 'Margherita Pizza', emoji: '🍕', calories: 540, price: 299, diet: 'veg', restaurant: 'Pizza Union · BKC Mumbai', restoLat: 28.6139, restoLng: 77.2090 },
+        { id: 12, name: 'Butter Chicken', emoji: '🍗', calories: 620, price: 379, diet: 'nonveg', restaurant: 'Mughlai Palace · Lucknow', restoLat: 28.6239, restoLng: 77.2190 },
+        { id: 13, name: 'Falafel Wrap', emoji: '🌯', calories: 340, price: 169, diet: 'vegan', restaurant: 'Mediterranean Bites · Hyderabad', restoLat: 28.6339, restoLng: 77.2290 },
+        { id: 14, name: 'Paneer Masala', emoji: '🧀', calories: 490, price: 259, diet: 'veg', restaurant: 'Punjabi Dhaba · Delhi', restoLat: 28.6439, restoLng: 77.2390 },
+        { id: 15, name: 'Tandoori Chicken', emoji: '🍖', calories: 550, price: 329, diet: 'nonveg', restaurant: 'Tandoor House · Amritsar', restoLat: 28.6539, restoLng: 77.2490 },
+        { id: 16, name: 'Vegan Smoothie', emoji: '🥥', calories: 220, price: 159, diet: 'vegan', restaurant: 'Green Bowl · Chennai', restoLat: 28.6639, restoLng: 77.2590 },
+        { id: 17, name: 'Mushroom Risotto', emoji: '🍄', calories: 380, price: 219, diet: 'veg', restaurant: 'Italian Bistro · Pune', restoLat: 28.6739, restoLng: 77.2690 },
+        { id: 18, name: 'Chicken Shawarma', emoji: '🌯', calories: 490, price: 249, diet: 'nonveg', restaurant: 'Shawarma Station · Kochi', restoLat: 28.6839, restoLng: 77.2790 }
+      ],
+      toing: [
+        { id: 19, name: 'Idli Sambhar', emoji: '🫓', calories: 250, price: 99, diet: 'veg', restaurant: 'South Indian Cafe · Mysore', restoLat: 28.6139, restoLng: 77.2090 },
+        { id: 20, name: 'Mutton Rogan Josh', emoji: '🥘', calories: 710, price: 419, diet: 'nonveg', restaurant: 'Kashmiri Kitchen · Srinagar', restoLat: 28.6239, restoLng: 77.2190 },
+        { id: 21, name: 'Quinoa Salad', emoji: '🥗', calories: 290, price: 179, diet: 'vegan', restaurant: 'Health Hub · Bengaluru', restoLat: 28.6339, restoLng: 77.2290 },
+        { id: 22, name: 'Chole Bhature', emoji: '🍛', calories: 520, price: 189, diet: 'veg', restaurant: 'Punjabi Dhaba · Delhi', restoLat: 28.6439, restoLng: 77.2390 },
+        { id: 23, name: 'Grilled Fish', emoji: '🐠', calories: 490, price: 349, diet: 'nonveg', restaurant: 'Sea Catch · Chennai', restoLat: 28.6539, restoLng: 77.2490 },
+        { id: 24, name: 'Vegan Pizza', emoji: '🍕', calories: 410, price: 269, diet: 'vegan', restaurant: 'Plant Base · Mumbai', restoLat: 28.6639, restoLng: 77.2590 },
+        { id: 25, name: 'Dal Khichdi', emoji: '🍲', calories: 310, price: 139, diet: 'veg', restaurant: 'Comfort Bowl · Indore', restoLat: 28.6739, restoLng: 77.2690 }
+      ],
+      nearby: [
+        { id: 26, name: 'Tandoori Nights', emoji: '🔥', calories: 580, price: 399, diet: 'nonveg', restaurant: '📍 2.3 km · Open · 4.5★', restoLat: 28.6239, restoLng: 77.2190 },
+        { id: 27, name: 'Spice Garden', emoji: '🌿', calories: 420, price: 289, diet: 'veg', restaurant: '📍 1.8 km · Open · 4.2★', restoLat: 28.6339, restoLng: 77.2290 },
+        { id: 28, name: 'Coastal Flavours', emoji: '🐠', calories: 510, price: 359, diet: 'nonveg', restaurant: '📍 3.1 km · Open · 4.0★', restoLat: 28.6439, restoLng: 77.2390 },
+        { id: 29, name: 'GreenLeaf Vegan', emoji: '🥑', calories: 340, price: 219, diet: 'vegan', restaurant: '📍 2.7 km · Open · 4.7★', restoLat: 28.6539, restoLng: 77.2490 },
+        { id: 30, name: 'Punjab Grill', emoji: '🍖', calories: 620, price: 429, diet: 'nonveg', restaurant: '📍 1.2 km · Open · 4.3★', restoLat: 28.6639, restoLng: 77.2590 },
+        { id: 31, name: 'Sattvik Bhojan', emoji: '🍛', calories: 380, price: 199, diet: 'veg', restaurant: '📍 4.0 km · Open · 4.1★', restoLat: 28.6739, restoLng: 77.2690 },
+        { id: 32, name: 'Bombay Street', emoji: '🥪', calories: 410, price: 189, diet: 'veg', restaurant: '📍 1.5 km · Open · 4.6★', restoLat: 28.6839, restoLng: 77.2790 }
+      ]
+    };
+
+    // ====== DOM refs ======
+    const grid = document.getElementById('mealGrid');
+    const totalCalSpan = document.getElementById('totalCalories');
+    const totalPriceSpan = document.getElementById('totalPrice');
+    const totalCostBox = document.getElementById('totalCostBox');
+    const cartItemCount = document.getElementById('cartItemCount');
+    const dietButtons = document.querySelectorAll('#dietFilter .filter-btn');
+    const appButtons = document.querySelectorAll('.app-btn');
+
+    // Cart
+    const shoppingListEl = document.getElementById('shoppingList');
+    const listCount = document.getElementById('listCount');
+    let cartItems = [];
+
+    // Nearby Restaurants
+    const nearbyGrid = document.getElementById('nearbyGrid');
+    const nearbyCount = document.getElementById('nearbyCount');
+    let userLat = 28.6139;
+    let userLng = 77.2090;
+
+    // Reviews
+    const reviewName = document.getElementById('reviewName');
+    const reviewRating = document.getElementById('reviewRating');
+    const reviewText = document.getElementById('reviewText');
+    const submitBtn = document.getElementById('submitReview');
+    const reviewsList = document.getElementById('reviewsList');
+    const reviewCount = document.getElementById('reviewCount');
+    let reviews = [];
+
+    // AI
+    const aiBudgetInput = document.getElementById('aiBudgetInput');
+    const aiSuggestBtn = document.getElementById('aiSuggestBtn');
+
+    let currentApp = 'swiggy';
+    let currentDiet = 'all';
+
+    // ====== LOAD DATA ======
+    try {
+      const saved = localStorage.getItem('nutriBudgetReviews');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) reviews = parsed;
+      }
+    } catch(e) { reviews = []; }
+
+    try {
+      const savedCart = localStorage.getItem('nutriBudgetCart');
+      if (savedCart) {
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed) && parsed.length > 0) cartItems = parsed;
+      }
+    } catch(e) { cartItems = []; }
+
+    // ====== RENDER REVIEWS ======
+    function renderReviews() {
+      if (reviews.length === 0) {
+        reviewsList.innerHTML = `<div class="no-reviews">No reviews yet. Be the first! 🍽️</div>`;
+        reviewCount.textContent = '(0 reviews)';
+        return;
+      }
+      let html = '';
+      const sorted = [...reviews].reverse();
+      sorted.forEach(r => {
+        const stars = '⭐'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+        html += `
+          <div class="review-item">
+            <div class="review-header">
+              <span class="review-name">${escapeHtml(r.name || 'Anonymous')}</span>
+              <span class="review-stars">${stars}</span>
+              <span class="review-date">${r.date || 'Just now'}</span>
+            </div>
+            <div class="review-text">${escapeHtml(r.text)}</div>
+          </div>
+        `;
+      });
+      reviewsList.innerHTML = html;
+      reviewCount.textContent = `(${reviews.length} reviews)`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ====== CART FUNCTIONS ======
+    function renderCart() {
+      if (cartItems.length === 0) {
+        shoppingListEl.innerHTML = `<div class="empty-list">Your cart is empty. Add items using + button above.</div>`;
+        listCount.textContent = '(0 items)';
+        cartItemCount.textContent = '(0 items)';
+        updateTotals();
+        return;
+      }
+
+      let html = '';
+      let totalItems = 0;
+      cartItems.forEach((item, index) => {
+        totalItems += item.qty;
+        html += `
+          <div class="list-item">
+            ${item.emoji} ${item.name} 
+            <span class="qty-badge">×${item.qty}</span>
+            <span style="font-size:0.7rem; opacity:0.5;">₹${item.price * item.qty}</span>
+            <span class="remove" data-index="${index}">✕</span>
+          </div>
+        `;
+      });
+      shoppingListEl.innerHTML = html;
+      listCount.textContent = `(${totalItems} items)`;
+      cartItemCount.textContent = `(${totalItems} items)`;
+
+      document.querySelectorAll('.list-item .remove').forEach(el => {
+        el.addEventListener('click', function() {
+          const idx = parseInt(this.dataset.index);
+          cartItems.splice(idx, 1);
+          localStorage.setItem('nutriBudgetCart', JSON.stringify(cartItems));
+          renderCart();
+          renderMenu();
+        });
+      });
+      updateTotals();
+    }
+
+    function updateCartItem(mealId, change) {
+      const existing = cartItems.find(item => item.id === mealId);
+      if (existing) {
+        existing.qty += change;
+        if (existing.qty <= 0) {
+          cartItems = cartItems.filter(item => item.id !== mealId);
+        }
+      } else if (change > 0) {
+        const menu = getCurrentMenu();
+        const meal = menu.find(item => item.id === mealId);
+        if (meal) {
+          cartItems.push({ ...meal, qty: 1 });
+        }
+      }
+      localStorage.setItem('nutriBudgetCart', JSON.stringify(cartItems));
+      renderCart();
+      renderMenu();
+    }
+
+    function getCurrentMenu() {
+      return appMenus[currentApp] || [];
+    }
+
+    function getCartQty(mealId) {
+      const item = cartItems.find(i => i.id === mealId);
+      return item ? item.qty : 0;
+    }
+
+    function updateTotals() {
+      let totalCal = 0;
+      let totalPrice = 0;
+      let totalItems = 0;
+
+      cartItems.forEach(item => {
+        totalCal += item.calories * item.qty;
+        totalPrice += item.price * item.qty;
+        totalItems += item.qty;
+      });
+
+      totalCalSpan.textContent = totalCal;
+      totalPriceSpan.textContent = totalPrice.toLocaleString('en-IN');
+
+      const budget = parseInt(document.getElementById('aiBudgetInput')?.value, 10) || 0;
+      if (totalPrice > budget && budget > 0) {
+        totalCostBox.style.borderColor = '#ff7a5a';
+        totalCostBox.style.boxShadow = '0 0 24px #ff5a3a70';
+        totalCostBox.style.background = 'rgba(255, 50, 30, 0.2)';
+      } else {
+        totalCostBox.style.borderColor = '#fad6a8';
+        totalCostBox.style.boxShadow = 'none';
+        totalCostBox.style.background = 'rgba(0,0,0,0.25)';
+      }
+    }
+
+    // ====== RENDER MENU ======
+    function renderMenu() {
+      const menu = getCurrentMenu();
+      const filtered = menu.filter(item => {
+        if (currentDiet !== 'all' && item.diet !== currentDiet) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; opacity:0.6;">No items match your diet filter</div>`;
+        return;
+      }
+
+      let html = '';
+      filtered.forEach(item => {
+        const dietClass = item.diet === 'veg' ? 'veg-tag' : (item.diet === 'nonveg' ? 'nonveg-tag' : 'vegan-tag');
+        const dietLabel = item.diet === 'veg' ? '🌿 Veg' : (item.diet === 'nonveg' ? '🍗 Non-Veg' : '🌱 Vegan');
+        const qty = getCartQty(item.id);
+        
+        html += `
+          <div class="meal-card" data-id="${item.id}">
+            <div class="meal-emoji">${item.emoji}</div>
+            <div class="meal-name">${item.name}</div>
+            <div class="resto-tag">${item.restaurant}</div>
+            <div class="meal-detail">
+              <span>🔥 ${item.calories} kcal</span>
+              <span class="price-ind">₹${item.price}</span>
+            </div>
+            <span class="${dietClass}">${dietLabel}</span>
+            <div class="quantity-controls" data-id="${item.id}">
+              ${qty > 0 ? `
+                <button class="qty-btn minus" data-action="minus">−</button>
+                <span class="qty-display">${qty}</span>
+                <button class="qty-btn plus" data-action="plus">+</button>
+              ` : `
+                <button class="add-btn" data-action="add">+ Add</button>
+              `}
+            </div>
+          </div>
+        `;
+      });
+      grid.innerHTML = html;
+
+      document.querySelectorAll('.quantity-controls').forEach(container => {
+        const id = parseInt(container.dataset.id);
+        
+        container.querySelectorAll('.qty-btn').forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const action = this.dataset.action;
+            const change = action === 'plus' ? 1 : -1;
+            updateCartItem(id, change);
+            const display = container.querySelector('.qty-display');
+            if (display) {
+              container.classList.remove('pop');
+              void container.offsetWidth;
+              container.classList.add('pop');
+            }
+          });
+        });
+
+        const addBtn = container.querySelector('.add-btn');
+        if (addBtn) {
+          addBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            updateCartItem(id, 1);
+            container.classList.remove('pop');
+            void container.offsetWidth;
+            container.classList.add('pop');
+          });
+        }
+      });
+    }
+
+    // ====== RENDER NEARBY RESTAURANTS ======
+    function renderNearbyRestaurants() {
+      const menu = getCurrentMenu();
+      // Group by restaurant name
+      const restoMap = new Map();
+      menu.forEach(item => {
+        const key = item.restaurant;
+        if (!restoMap.has(key)) {
+          restoMap.set(key, {
+            name: key,
+            items: [],
+            lat: item.restoLat || userLat + (Math.random() - 0.5) * 0.01,
+            lng: item.restoLng || userLng + (Math.random() - 0.5) * 0.01,
+            distance: (Math.random() * 4 + 0.5).toFixed(1)
+          });
+        }
+        restoMap.get(key).items.push(item);
+      });
+
+      const restaurants = Array.from(restoMap.values());
+      
+      if (restaurants.length === 0) {
+        nearbyGrid.innerHTML = `<div class="no-nearby">No restaurants found nearby. Try changing your location.</div>`;
+        nearbyCount.textContent = '(0 nearby)';
+        return;
+      }
+
+      let html = '';
+      restaurants.slice(0, 8).forEach(resto => {
+        const avgRating = (3.5 + Math.random() * 1.5).toFixed(1);
+        const itemsHtml = resto.items.slice(0, 4).map(item => 
+          `<span class="menu-item-tag">
+            ${item.emoji} ${item.name}
+            <span class="menu-price">₹${item.price}</span>
+          </span>`
+        ).join('');
+
+        html += `
+          <div class="restaurant-card">
+            <div class="resto-header">
+              <div class="resto-name">
+                <span class="resto-icon">🏪</span>
+                ${escapeHtml(resto.name)}
+              </div>
+              <span class="resto-distance">📍 ${resto.distance} km</span>
+            </div>
+            <div class="resto-rating">⭐ ${avgRating} ★ (${Math.floor(Math.random() * 50 + 10)} reviews)</div>
+            <div class="resto-menu">${itemsHtml}</div>
+            <div class="resto-address">📍 ${Math.random() > 0.5 ? 'Open now' : 'Closes at 11:00 PM'} · ${['Serves breakfast', 'Serves lunch', 'Serves dinner', 'All day dining'][Math.floor(Math.random() * 4)]}</div>
+          </div>
+        `;
+      });
+
+      nearbyGrid.innerHTML = html;
+      nearbyCount.textContent = `(${restaurants.length} nearby)`;
+    }
+
+    // ====== AI SUGGEST ======
+    function aiSuggestMeals() {
+      const budget = parseInt(aiBudgetInput.value, 10) || 100;
+      if (budget < 10) {
+        alert('Please enter a valid budget (minimum ₹10).');
+        return;
+      }
+
+      aiSuggestBtn.disabled = true;
+      aiSuggestBtn.textContent = '🤖 Thinking...';
+
+      const menu = getCurrentMenu();
+      const filtered = menu.filter(item => {
+        if (currentDiet !== 'all' && item.diet !== currentDiet) return false;
+        return true;
+      });
+
+      const sorted = [...filtered].sort((a, b) => a.price - b.price);
+      let selected = [];
+      let remaining = budget;
+      let totalCal = 0;
+
+      for (const item of sorted) {
+        if (item.price <= remaining) {
+          selected.push(item);
+          remaining -= item.price;
+          totalCal += item.calories;
+        }
+        if (selected.length >= 4) break;
+      }
+
+      if (selected.length === 0) {
+        alert(`No meals found within ₹${budget}. Try increasing your budget.`);
+        aiSuggestBtn.disabled = false;
+        aiSuggestBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem;">auto_awesome</span> Suggest Meals';
+        return;
+      }
+
+      selected.forEach(item => {
+        const existing = cartItems.find(i => i.id === item.id);
+        if (existing) {
+          existing.qty += 1;
+        } else {
+          cartItems.push({ ...item, qty: 1 });
+        }
+      });
+      localStorage.setItem('nutriBudgetCart', JSON.stringify(cartItems));
+      renderCart();
+      renderMenu();
+
+      let msg = `🍽️ AI Added to Cart (₹${budget}/day):\n\n`;
+      selected.forEach(item => {
+        msg += `  ${item.emoji} ${item.name} - ₹${item.price} (${item.calories} kcal)\n`;
+      });
+      msg += `\n📊 Total: ₹${budget - remaining} spent · ${totalCal} kcal`;
+      msg += `\n💰 Remaining: ₹${remaining}`;
+      alert(msg);
+
+      aiSuggestBtn.disabled = false;
+      aiSuggestBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size:1.2rem;">auto_awesome</span> Suggest Meals';
+    }
+
+    // ====== APP & DIET FILTERS ======
+    appButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        appButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentApp = this.dataset.app;
+        renderMenu();
+        renderNearbyRestaurants();
+      });
+    });
+
+    dietButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        dietButtons.forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentDiet = this.dataset.diet;
+        renderMenu();
+        renderNearbyRestaurants();
+      });
+    });
+
+    // ====== LOCATION ======
+    const locationDisplay = document.getElementById('locationDisplay');
+    const locateBtn = document.getElementById('locateBtn');
+    const mapIframe = document.getElementById('mapIframe');
+
+    function isInIndia(lat, lng) {
+      return lat >= 8.0 && lat <= 37.0 && lng >= 68.0 && lng <= 97.0;
+    }
+
+    function updateMap(lat, lng, place = 'India') {
+      const inIndia = isInIndia(lat, lng);
+      if (!inIndia) { lat = 28.6139; lng = 77.2090; place = 'India (Delhi)'; }
+      userLat = lat;
+      userLng = lng;
+      locationDisplay.innerHTML = `📍 ${place} · ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+      mapIframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3500.000!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${lat}%2C${lng}!5e0!3m2!1sen!2sin!4v1700000000000`;
+      locateBtn.onclick = function() {
+        window.open(`https://www.google.com/maps/search/restaurants/@${lat},${lng},15z?hl=en`, '_blank');
+      };
+      locateBtn.querySelector('span:last-child').textContent = 'Nearby';
+      // Refresh nearby restaurants
+      renderNearbyRestaurants();
+    }
+
+    function locationError() { 
+      updateMap(28.6139, 77.2090, 'India (Delhi)'); 
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        let lat = pos.coords.latitude, lng = pos.coords.longitude;
+        isInIndia(lat, lng) ? updateMap(lat, lng, 'India') : updateMap(28.6139, 77.2090, 'India (Delhi)');
+      }, locationError, { enableHighAccuracy: true, timeout: 8000 });
+    } else { locationError(); }
+
+    locateBtn.addEventListener('click', function(e) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((pos) => {
+          let lat = pos.coords.latitude, lng = pos.coords.longitude;
+          isInIndia(lat, lng) ? updateMap(lat, lng, 'India') : updateMap(28.6139, 77.2090, 'India (Delhi)');
+        }, locationError, { enableHighAccuracy: true, timeout: 5000 });
+      }
+    });
+
+    // ====== REVIEW SUBMIT ======
+    function addReview() {
+      const name = reviewName.value.trim() || 'Anonymous';
+      const rating = parseInt(reviewRating.value);
+      const text = reviewText.value.trim();
+
+      if (!text) {
+        alert('Please write your review before submitting.');
+        return;
+      }
+
+      const newReview = {
+        name: name,
+        rating: rating,
+        text: text,
+        date: new Date().toISOString().slice(0, 10)
+      };
+
+      reviews.push(newReview);
+      localStorage.setItem('nutriBudgetReviews', JSON.stringify(reviews));
+      renderReviews();
+
+      reviewText.value = '';
+      reviewName.value = '';
+      reviewRating.value = '5';
+      
+      submitBtn.textContent = '✅ Submitted!';
+      submitBtn.disabled = true;
+      setTimeout(() => { 
+        submitBtn.textContent = 'Submit Review';
+        submitBtn.disabled = false;
+      }, 2000);
+    }
+
+    submitBtn.addEventListener('click', addReview);
+    reviewText.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) addReview();
+    });
+
+    // ====== AI SUGGEST ======
+    aiSuggestBtn.addEventListener('click', aiSuggestMeals);
+
+    // ====== INIT ======
+    renderMenu();
+    renderCart();
+    renderReviews();
+    renderNearbyRestaurants();
+  })();
+</script>
+</body>
+</html>
